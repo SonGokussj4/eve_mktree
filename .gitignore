@@ -104,4 +104,6 @@ venv.bak/
 .mypy_cache/
 
 # Personal folders
-/DATA
+DATA/
+result.txt
+libs/
