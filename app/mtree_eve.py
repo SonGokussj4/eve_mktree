@@ -31,10 +31,10 @@ def tprint(tree, pref='-', root=True):
     b_con = c_con = b_end = c_end = ''
 
     if not root:  # add decorations
-        b_con = ' ├─ '  # branch, continuing
-        c_con = ' │  '  # indent, continuing
-        b_end = ' └─ '  # branch, ending
-        c_end = '    '  # indent, ending
+        b_con = '   ├─ '  # branch, continuing
+        c_con = '   │  '  # indent, continuing
+        b_end = '   └─ '  # branch, ending
+        c_end = '      '  # indent, ending
 
     for i, node in enumerate(tree):
         b, c = b_con, c_con
@@ -115,45 +115,39 @@ def main():
     #     ["002", "003", "004", "012"],
     #     ["002", "003", "008", "009", "011"],
     # ]
-    curdir = Path('.')
+    curdir = Path('.').absolute()
     # curdir = Path('/ST/Evektor/UZIV/JVERNER/PROJEKTY/UZIV/JFROLEK/NEZALOHUJESE/20181205_eve-mktree/DATA/')
-
     variants = []
 
-    for item in DATA_FOLDER.iterdir():
-        if not item.is_dir():
+    for item in curdir.iterdir():
+        if not item.is_dir() or not any(char.isdigit() for char in item.stem):
             continue
         folder = item
         # print("DEBUG: folder:", folder)
         folder_num = folder.name.split('_')[-1]
-
+        # print("DEBUG: folder_num:", folder_num)
         # Grab only .pc files that have the same project number as parent folder
         # possible matches in name: '_002_' or '_002.'
         # '**/*' .. all files recursively
         files = [x for x in folder.glob('*.pc')
                  if x.is_file()
                  if f'_{folder_num}_' in x.name or f'_{folder_num}.' in x.name]
-
+        # print("DEBUG: files:", files)
+        if len(files) == 0:
+            print(f"[ERROR  ]: No *.pc files (with same name as variant directory) found in: {folder.name}")
+            continue
         variants.append(Variant(files))
 
     list_of_names = []
     for variant in variants:
-        # print("\n#####################################################################################################")
-        # print("#####################################################################################################")
         # print("variant.pc", variant.pc)
         # print("variant.names", variant.names)
         # print("variant.nodes", variant.nodes)
         joined_names = ';'.join(variant.names)
         list_of_names.append(joined_names)
 
-    # print("================")
-    vars_list = [var for var in list_of_names]
-    # for variant in vars_list:
-    #     print(variant)
-
-    vars_list_sorted = sorted(vars_list)
-    # print("DEBUG: vars_list_sorted:", vars_list_sorted)
-    # print("================")
+    vars_string = [var for var in list_of_names]
+    vars_list_sorted = sorted(vars_string)
     vars_list = [items.split(';') for items in vars_list_sorted]
 
     Tree = lambda: defaultdict(Tree)
